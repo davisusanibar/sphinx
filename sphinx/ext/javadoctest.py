@@ -12,7 +12,7 @@ from sphinx.ext.doctest import (
     TestcodeDirective,
     TestoutputDirective,
     doctest,
-    sphinx,
+    sphinx, DoctestDirective,
 )
 from sphinx.locale import __
 
@@ -99,11 +99,10 @@ class JavaDocTestBuilder(DocTestBuilder):
         output = (4 * ' ').join(output.split('\t'))
         return output
 
-
 def setup(app: Sphinx) -> Dict[str, Any]:
     app.add_directive("javatestcode", TestcodeDirective)
     app.add_directive("javatestoutput", TestoutputDirective)
-    app.add_directive('javadoctest', TestcodeDirective)
+    app.add_directive('javadoctest', DoctestDirective)
     app.add_builder(JavaDocTestBuilder)
     # this config value adds to sys.path
     app.add_config_value("doctest_path", [], False)

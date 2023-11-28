@@ -37,6 +37,15 @@ logger = logging.getLogger(__name__)
 blankline_re = re.compile(r'^\s*<BLANKLINE>', re.MULTILINE)
 doctestopt_re = re.compile(r'#\s*doctest:.+$', re.MULTILINE)
 
+import subprocess
+from sphinx.errors import ExtensionError
+def get_java_version() -> Any:
+    try:
+        java_version = subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
+        return re.search(r'\"(\d+\.\d+\.\d).*\"',
+                         java_version.decode("utf-8")).groups()[0]  # type: ignore
+    except subprocess.CalledProcessError as e:
+        raise ExtensionError(__('Java error: ' + e.output.decode()))
 
 def is_allowed_version(spec: str, version: str) -> bool:
     """Check `spec` satisfies `version` or not.
@@ -67,6 +76,7 @@ class TestDirective(SphinxDirective):
     required_arguments = 0
     optional_arguments = 1
     final_argument_whitespace = True
+
 
     def run(self) -> list[Node]:
         # use ordinary docutils nodes for test code: they get special attributes
@@ -131,6 +141,18 @@ class TestDirective(SphinxDirective):
                 self.state.document.reporter.warning(
                     __("'%s' is not a valid pyversion option") % spec,
                     line=self.lineno)
+        if self.name in ('javadoctest', 'javatestcode', 'javatestoutput') and 'javaversion' in self.options:
+            try:
+                print("aaca")
+                spec = self.options['javaversion']
+                java_version = get_java_version()
+                if not is_allowed_version(spec, java_version):
+                    flag = doctest.OPTIONFLAGS_BY_NAME['SKIP']
+                    node['options'][flag] = True  # Skip the test
+            except InvalidSpecifier:
+                self.state.document.reporter.warning(
+                    __("'%s' is not a valid javaversion option") % spec,
+                    line=self.lineno)
         if 'skipif' in self.options:
             node['skipif'] = self.options['skipif']
         if 'trim-doctest-flags' in self.options:
@@ -168,6 +190,7 @@ class TestcodeDirective(TestDirective):
         'hide': directives.flag,
         'no-trim-doctest-flags': directives.flag,
         'pyversion': directives.unchanged_required,
+        'javaversion': directives.unchanged_required,
         'skipif': directives.unchanged_required,
         'trim-doctest-flags': directives.flag,
     }
@@ -179,6 +202,7 @@ class TestoutputDirective(TestDirective):
         'no-trim-doctest-flags': directives.flag,
         'options': directives.unchanged,
         'pyversion': directives.unchanged_required,
+        'javaversion': directives.unchanged_required,
         'skipif': directives.unchanged_required,
         'trim-doctest-flags': directives.flag,
     }
