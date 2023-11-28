@@ -16,7 +16,6 @@ from sphinx.ext.doctest import (
 )
 from sphinx.locale import __
 
-
 class JavaTestcodeDirective(TestcodeDirective):
     def run(self):
         node_list = super().run()
@@ -102,8 +101,9 @@ class JavaDocTestBuilder(DocTestBuilder):
 
 
 def setup(app: Sphinx) -> Dict[str, Any]:
-    app.add_directive("testcode", JavaTestcodeDirective)
-    app.add_directive("testoutput", TestoutputDirective)
+    app.add_directive("javatestcode", TestcodeDirective)
+    app.add_directive("javatestoutput", TestoutputDirective)
+    app.add_directive('javadoctest', TestcodeDirective)
     app.add_builder(JavaDocTestBuilder)
     # this config value adds to sys.path
     app.add_config_value("doctest_path", [], False)

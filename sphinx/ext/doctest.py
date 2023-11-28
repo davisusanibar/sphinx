@@ -73,7 +73,8 @@ class TestDirective(SphinxDirective):
         # so that our builder recognizes them, and the other builders are happy.
         code = '\n'.join(self.content)
         test = None
-        if self.name == 'doctest':
+        print("ww00000>>>")
+        if self.name == 'doctest' or self.name == 'javatestcode':
             if '<BLANKLINE>' in code:
                 # convert <BLANKLINE>s to ordinary blank lines for presentation
                 test = code
@@ -203,11 +204,11 @@ class TestGroup:
                 self.setup.append(code)
         elif code.type == 'testcleanup':
             self.cleanup.append(code)
-        elif code.type == 'doctest':
+        elif code.type == 'doctest' or code.type == 'javadoctest':
             self.tests.append([code])
-        elif code.type == 'testcode':
+        elif code.type == 'testcode' or code.type == 'javatestcode':
             self.tests.append([code, None])
-        elif code.type == 'testoutput':
+        elif code.type == 'testoutput' or code.type == 'javatestoutput':
             if self.tests and len(self.tests[-1]) == 2:
                 self.tests[-1][1] = code
         else:
